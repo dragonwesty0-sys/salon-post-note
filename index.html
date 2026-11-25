@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>美容室の空き枠告知・ヘアスタイル投稿文作成 | サロン投稿ノート</title>
+<meta name="description" content="予約の空き枠や、ヘアスタイルの紹介文を作ってコピーできます。">
+<meta property="og:title" content="美容室の空き枠告知・ヘアスタイル投稿文作成 | サロン投稿ノート">
+<meta property="og:description" content="予約の空き枠や、ヘアスタイルの紹介文を作ってコピーできます。">
+<meta property="og:type" content="website">
+<style>:root{--accent:#93455f;--bg:#fff1f4}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#24242b;font:16px/1.65 system-ui,sans-serif}header,main,footer{width:min(100% - 2rem,50rem);margin:auto}header{padding:1.15rem 0;font-weight:800;color:var(--accent);border-bottom:1px solid #24242b24}main{padding:clamp(1.7rem,5vw,3.8rem) 0}h1{font-size:clamp(1.65rem,5.5vw,3.3rem);line-height:1.25;margin:0 0 .65rem;letter-spacing:-.04em}h2{font-size:1.25rem;margin:0 0 .5rem}p{margin:0 0 1rem}.lead{max-width:36rem}.panel{background:#fff;border:1px solid #24242b20;border-radius:1.25rem;padding:clamp(.9rem,4vw,1.6rem);margin-top:1.4rem}.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,13rem),1fr));gap:0 1rem}label{display:block;font-weight:650;margin-bottom:.85rem}input:not([type=checkbox]),textarea,select{display:block;width:100%;font:inherit;margin-top:.3rem;padding:.55rem .7rem;border:1px solid #686874;border-radius:.5rem;background:#fff;color:#24242b;min-height:44px}textarea{min-height:8rem;resize:vertical}button{font:inherit;font-weight:700;min-height:44px;padding:.45rem .8rem;border:1px solid var(--accent);border-radius:.55rem;color:var(--accent);background:#fff;cursor:pointer}.primary{background:var(--accent);color:white}button:disabled{opacity:.55;cursor:default}fieldset{border:1px solid #b4b4bd;border-radius:.6rem;margin:0 0 .75rem;padding:.7rem;min-width:0}legend{font-weight:700}.checks{display:flex;flex-wrap:wrap;gap:.25rem .9rem}.checks label{display:inline-flex;align-items:center;gap:.3rem;min-height:34px;margin-bottom:.35rem}input[type=checkbox]{width:1.25rem;height:1.25rem}.actions{display:flex;flex-wrap:wrap;gap:.55rem;margin-top:1rem}output{display:block;white-space:pre-wrap;overflow-wrap:anywhere;border-top:1px solid #24242b24;margin-top:1rem;padding-top:1rem}output:empty{display:none}.guide{margin-top:2rem}footer{border-top:1px solid #24242b24;padding:1rem 0;color:#4c4c56;font-size:.9rem}:focus-visible{outline:3px solid var(--accent);outline-offset:3px}[hidden]{display:none!important}</style>
+</head>
+<body>
+<header>サロン投稿ノート</header>
+<main>
+<h1>美容室の空き枠告知・ヘアスタイル投稿文作成</h1>
+<p class="lead">予約の空き枠や、ヘアスタイルの紹介文を作ってコピーできます。</p>
+<div class="panel">
+<form id="tool">
+<div class="fields"><label>投稿の種類<select id="kind"><option value="slot">予約の空き枠</option><option value="style">ヘアスタイル紹介</option></select></label><label>サロン名<input id="salon" placeholder="例：○○ hair"></label></div><div class="fields"><label id="topicLabel"><span>日程・時間</span><input id="topic" required placeholder="例：金曜 14:00"></label><label id="menuLabel"><span>案内するメニュー</span><input id="menu" placeholder="例：カット＋カラー"></label></div><label>予約方法<input id="booking" placeholder="例：DMでご相談ください"></label><label>文体<select id="tone"><option value="formal">丁寧</option><option value="casual">親しみやすい</option></select></label>
+<div class="actions"><button class="primary" type="submit">投稿文を作成</button><button type="button" id="copy" disabled>結果をコピー</button></div>
+</form>
+<output id="result" aria-live="polite"></output>
+<p id="notice" role="status"></p>
+</div>
+<section class="guide">
+<h2>使い方と計算・入力のルール</h2>
+<p>空き枠の告知には日付と時間、対象メニュー、予約方法を入れると、読んだ人が次に何をすればいいか分かります。投稿前に最新の予約状況と文面を確認してください。</p>
+</section>
+</main>
+<footer>入力内容はブラウザ内で処理し、このページから外部に送信しません。</footer>
+<script>
+'use strict';
+const form = document.querySelector('#tool');
+const result = document.querySelector('#result');
+const copy = document.querySelector('#copy');
+const status = document.querySelector('#notice');
+const kind = document.querySelector('#kind');
+const topic = document.querySelector('#topic');
+const menu = document.querySelector('#menu');
+function updateLabels() {
+  const slot = kind.value === 'slot';
+  document.querySelector('#topicLabel span').textContent = slot ? '日程・時間' : 'スタイル名';
+  document.querySelector('#menuLabel span').textContent = slot ? '案内するメニュー' : '仕上がり・ポイント';
+  topic.placeholder = slot ? '例：金曜 14:00' : '例：くびれボブ';
+  menu.placeholder = slot ? '例：カット＋カラー' : '例：顔まわりが軽く見えるレイヤー';
+}
+kind.addEventListener('change', updateLabels);
+function calculate() {
+  const subject = topic.value.trim();
+  if (!subject) throw Error('日程・時間またはスタイル名を入力してください。');
+  const salon = document.querySelector('#salon').value.trim();
+  const booking = document.querySelector('#booking').value.trim();
+  const casual = document.querySelector('#tone').value === 'casual';
+  const detail = menu.value.trim();
+  const slot = kind.value === 'slot';
+  const title = slot ? '【予約空きのお知らせ】' : '【スタイル紹介】' + subject;
+  const intro = salon ? 'こんにちは、' + salon + 'です。' : '';
+  const body = slot ? subject + 'にご案内できます。' : (casual ? '今回のスタイルは「' + subject + '」です！' : '今回は「' + subject + '」をご紹介します。');
+  const extra = slot && detail ? '対象メニュー：' + detail : detail;
+  const close = booking || (casual ? 'お気軽にご相談くださいね！' : 'お気軽にお問い合わせください。');
+  return [title, intro, body, extra, close].filter(Boolean).join('\n\n');
+}
+
+form.addEventListener('submit', event => {
+  event.preventDefault();
+  try {
+    result.textContent = calculate();
+    copy.disabled = false;
+  } catch (error) {
+    result.textContent = error.message;
+    copy.disabled = true;
+  }
+  status.textContent = '';
+});
+function clearResult() {
+  result.textContent = '';
+  status.textContent = '';
+  copy.disabled = true;
+}
+form.addEventListener('input', clearResult);
+form.addEventListener('click', event => {
+  if (event.target.matches('#add, .remove')) clearResult();
+});
+copy.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(result.textContent);
+    status.textContent = 'コピーしました。';
+  } catch {
+    status.textContent = 'コピーできない場合は、結果を選択してコピーしてください。';
+  }
+});
+
+</script>
+</body>
+</html>
